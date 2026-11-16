@@ -17,6 +17,8 @@ public class Cannon
     private Rectangle _gameBoundingBox;
 
     private CannonBall[] _cBalls;
+    private bool _isEmpty = false;
+    internal bool IsEmpty => _isEmpty;
 
     private enum State {Alive, Dying, Dead}
     private State _state = State.Alive;
@@ -113,6 +115,9 @@ public class Cannon
 
     internal void Shoot()
     {
+        if (_isEmpty) 
+            return;
+
         int index = 0;
         while(index < _cBalls.Length)
         {
@@ -122,9 +127,19 @@ public class Cannon
                 float cbPositionX = BoundingBox.Center.X - _cBalls[index].BoundingBox.Width / 2;
                 float cbPositionY = BoundingBox.Top - _cBalls[index].BoundingBox.Height;
                 _cBalls[index].Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, -1));
-                index = _cBalls.Length; //we've shot a Cannon Ball, now exit loop
+                index = _cBalls.Length; 
             }
             index++;
+        }
+
+        _isEmpty = true;
+        foreach(CannonBall c in _cBalls)
+        {
+            if(c.Shootable)
+            {
+                _isEmpty = false;
+                break;
+            }
         }
     }
 
@@ -144,4 +159,12 @@ public class Cannon
         _dyingTimer = 0;
     }
 
+    internal void Reload()
+    {
+        foreach(CannonBall c in _cBalls)
+        {
+            c.Reload();
+        }
+        _isEmpty = false;
+    }
 }

@@ -7,7 +7,7 @@ namespace Lesson06_MosquitoAttack;
 
 public class Mosquito
 {
-    private const float _DyingDuration = 1f, _DecisionDelay = 10f;
+    private const float _DyingDuration = 1f, _DecisionDelay = 2f;
     private float _dyingTimer = 0, _decisionTimer = 0, _decision;
 
     private SimpleAnimation _animationAlive, _animationDying;
@@ -18,6 +18,7 @@ public class Mosquito
     private Rectangle _gameBoundingBox;
 
     private FireBall _fBall;
+    private bool _isEmpty = false;
 
     private enum State {Alive, Dying, Dead}
     private State _state = State.Alive;
@@ -73,6 +74,18 @@ public class Mosquito
                 if(BoundingBox.Left < _gameBoundingBox.Left || BoundingBox.Right > _gameBoundingBox.Right)
                     Direction = new Vector2(Direction.X * -1, Direction.Y);
                 _animationAlive?.Update(gameTime);
+
+                _decisionTimer += dt;
+                if (_decisionTimer >= _DecisionDelay)
+                {
+                    _decisionTimer = 0f;
+                    
+                    _decision = _rand.Next(1, 3); 
+                    if (_decision == 1)
+                    {
+                        Shoot();
+                    }
+                }
                 break;
             case State.Dying:
                 _dyingTimer += dt;
@@ -84,14 +97,11 @@ public class Mosquito
                 break;
         }  
 
-        _decisionTimer += dt;
-        if(_decision == 1 && _decisionTimer >= _DecisionDelay)
-        {
-            _decisionTimer = 0;
-            Shoot();
-        }
-            
         _fBall.Update(gameTime);
+        if (_fBall.Shootable)
+        {
+            _isEmpty = false;
+        }
     }
 
     internal void Draw(SpriteBatch spriteBatch)
@@ -119,6 +129,7 @@ public class Mosquito
             float cbPositionX = BoundingBox.Center.X - _fBall.BoundingBox.Width / 2;
             float cbPositionY = BoundingBox.Bottom;
             _fBall.Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, 1));
+            _isEmpty = true;
         }
     }
 

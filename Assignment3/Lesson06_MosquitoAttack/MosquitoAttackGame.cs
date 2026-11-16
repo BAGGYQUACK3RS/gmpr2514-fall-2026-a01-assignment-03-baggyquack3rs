@@ -67,7 +67,7 @@ public class MosquitoAttackGame : Game
 
         base.Initialize();
     }
-    
+
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -95,6 +95,9 @@ public class MosquitoAttackGame : Game
 
                 if(Pressed(Keys.Space))
                     _cannon.Shoot();
+
+                if(Pressed(Keys.R))
+                    _cannon.Reload();
 
                 if(Pressed(Keys.P))
                 {

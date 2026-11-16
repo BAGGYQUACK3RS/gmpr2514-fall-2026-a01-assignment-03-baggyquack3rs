@@ -77,4 +77,11 @@ public class CannonBall
         }
         return false;
     }
+
+    internal void Reload()
+    {
+        _state = State.NotFlying;
+        _position = Vector2.Zero;
+        _direction = Vector2.Zero;
+    }
 }
