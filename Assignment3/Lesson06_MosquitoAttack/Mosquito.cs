@@ -12,16 +12,18 @@ public class Mosquito
     private SimpleAnimation _animationAlive, _animationDying;
     private Vector2 _position;
     private float _speed;
-    private Texture2D _texture;
+    internal Vector2 Direction {get; set;} = Vector2.Zero;
+
     private Rectangle _gameBoundingBox;
+
+    private FireBall _fBall;
 
     private enum State {Alive, Dying, Dead}
     private State _state = State.Alive;
 
     internal bool Alive { get => _state == State.Alive;}
 
-    internal Vector2 Direction {get; set;} = Vector2.Zero;
-    // todo: refactor so that it doesn't depend on knowing there are 11 frames to find out the width
+    private Texture2D _texture;
     internal Rectangle BoundingBox
     {
         get 
@@ -36,6 +38,9 @@ public class Mosquito
         _speed = speed;
         Direction = direction;
         _gameBoundingBox = gameBoundingBox;
+
+        _fBall = new FireBall();
+        _fBall.Initialize(40, gameBoundingBox);
     }
     internal void LoadContent(ContentManager content)
     {
@@ -85,6 +90,25 @@ public class Mosquito
                 break;
         }
         
+    }
+
+    internal void Shoot()
+    {
+        if(_fBall.Shootable)
+        {
+
+            float cbPositionX = BoundingBox.Center.X - _fBall.BoundingBox.Width / 2;
+            float cbPositionY = BoundingBox.Top - _fBall.BoundingBox.Height;
+            _fBall.Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, -1));
+        }
+    }
+
+    internal bool ProcessCollision(Rectangle boundingBox)
+    {
+        if(_fBall.ProcessCollision(boundingBox))
+            return true;
+        else
+        return false;
     }
 
     internal void Die()

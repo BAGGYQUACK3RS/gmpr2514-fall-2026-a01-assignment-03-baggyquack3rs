@@ -21,6 +21,8 @@ public class Cannon
     private enum State {Alive, Dying, Dead}
     private State _state = State.Alive;
 
+     internal bool Alive { get => _state == State.Alive;}
+
     private Texture2D _texture;
     private Rectangle BoundingBox
     {
@@ -30,30 +32,19 @@ public class Cannon
         }
     }
 
-    // private Vector2 _direction = Vector2.Zero;
-    // internal Vector2 Direction
-    // {
-    //     get
-    //     {
-    //         return _direction;
-    //     }
-    //     set
-    //     {
-    //         _direction = value;
-    //     }
-    // }
-    internal void Initialize(Vector2 position, float speed, Rectangle gbb)
+    internal void Initialize(Vector2 position, float speed, Rectangle gameBoundingBox)
     {
         _position = position;  
         _speed = speed;  
+        _gameBoundingBox = gameBoundingBox;
+
         _cBalls = new CannonBall[10];
         for(int c = 0; c < _cBalls.Length; c++)
         {
             _cBalls[c] = new CannonBall();
-            _cBalls[c].Initialize(40, gbb);
+            _cBalls[c].Initialize(40, gameBoundingBox);
         }
 
-        _gameBoundingBox = gbb;
     }
     internal void LoadContent(ContentManager content)
     {
@@ -61,6 +52,13 @@ public class Cannon
         _animationAlive = new SimpleAnimation(_texture, _texture.Width / 4, _texture.Height, 4, 2f);
         foreach(CannonBall c in _cBalls)
             c.LoadContent(content);
+        
+        Texture2D dyingTexture = content.Load<Texture2D>("Poof");
+        int frameWidth = 16;
+        int frameHeight = dyingTexture.Height;
+        int frameCount = dyingTexture.Width / frameWidth;
+        float framesPerSecond = 8f;
+        _animationDying = new SimpleAnimation(dyingTexture, frameWidth, frameHeight, frameCount, framesPerSecond);
     }
     internal void Update(GameTime gameTime)
     {
