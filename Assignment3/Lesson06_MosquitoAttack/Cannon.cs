@@ -6,7 +6,10 @@ namespace Lesson06_MosquitoAttack;
 
 public class Cannon
 {
-    private SimpleAnimation _animation;
+    private const float _DyingDuration = 1f;
+    private float _dyingTimer = 0;
+
+    private SimpleAnimation _animationAlive, _animationDying;
     private Vector2 _position;
     private float _speed;
     internal Vector2 Direction {get; set;} = Vector2.Zero;
@@ -14,6 +17,9 @@ public class Cannon
     private Rectangle _gameBoundingBox;
 
     private CannonBall[] _cBalls;
+
+    private enum State {Alive, Dying, Dead}
+    private State _state = State.Alive;
 
     private Texture2D _texture;
     private Rectangle BoundingBox
@@ -52,7 +58,7 @@ public class Cannon
     internal void LoadContent(ContentManager content)
     {
         _texture = content.Load<Texture2D>("Cannon");
-        _animation = new SimpleAnimation(_texture, _texture.Width / 4, _texture.Height, 4, 2f);
+        _animationAlive = new SimpleAnimation(_texture, _texture.Width / 4, _texture.Height, 4, 2f);
         foreach(CannonBall c in _cBalls)
             c.LoadContent(content);
     }
@@ -62,20 +68,49 @@ public class Cannon
         _position += Direction * _speed * dt;
         // "?" checks for null before executing the method
         if(Direction != Vector2.Zero)
-            _animation?.Update(gameTime);
+            _animationAlive?.Update(gameTime);
 
         foreach(CannonBall c in _cBalls)
             c.Update(gameTime);
+
+        switch(_state)
+        {
+            case State.Alive:
+                _position += Direction * _speed * dt;
+                if(BoundingBox.Left < _gameBoundingBox.Left || BoundingBox.Right > _gameBoundingBox.Right)
+                    Direction = new Vector2(Direction.X * -1, Direction.Y);
+                _animationAlive?.Update(gameTime);
+                break;
+            case State.Dying:
+                _dyingTimer += dt;
+                if(_dyingTimer >= _DyingDuration)
+                    _state = State.Dead;
+                _animationDying?.Update(gameTime);
+                break;
+            case State.Dead:
+                break;
+        }  
     }
     internal void Draw(SpriteBatch spriteBatch)
     {
         SpriteEffects effects = SpriteEffects.None;
-        if(Direction.X < 0)
-            effects = SpriteEffects.FlipHorizontally;
-        _animation?.Draw(spriteBatch, _position, effects);
 
         foreach(CannonBall c in _cBalls)
             c.Draw(spriteBatch);
+
+        switch(_state)
+        {
+            case State.Alive:
+                if(Direction.X < 0)
+                    effects = SpriteEffects.FlipHorizontally;
+                _animationAlive?.Draw(spriteBatch, _position, effects);
+                break;
+            case State.Dying:
+                _animationDying?.Draw(spriteBatch, _position, SpriteEffects.None);
+                break;
+            case State.Dead:
+                break;
+        }
     }
 
     internal void Shoot()
@@ -103,6 +138,12 @@ public class Cannon
                 return true;
         }
         return false;
+    }
+
+    internal void Die()
+    {
+        _state = State.Dying;
+        _dyingTimer = 0;
     }
 
 }
