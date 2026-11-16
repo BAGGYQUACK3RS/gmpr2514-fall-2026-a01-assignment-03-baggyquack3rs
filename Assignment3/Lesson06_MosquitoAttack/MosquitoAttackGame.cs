@@ -20,8 +20,8 @@ public class MosquitoAttackGame : Game
     private Cannon _cannon;
     private Mosquito[] _mosquitoes;
 
-    private enum GameState {Playing, Paused, Over}
-    private GameState _gameState = GameState.Playing;
+    private enum GameState {Menu, Over, Paused, Level01}
+    private GameState _gameState = GameState.Level01;
     private KeyboardState _kbCurrent, _kbPrevious;
 
     private Rectangle GameBoundingBox
@@ -67,6 +67,7 @@ public class MosquitoAttackGame : Game
 
         base.Initialize();
     }
+    
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -83,7 +84,7 @@ public class MosquitoAttackGame : Game
         _kbCurrent = Keyboard.GetState();
         switch(_gameState)
         {
-            case GameState.Playing:        
+            case GameState.Level01:        
                 #region keyboard input
                 if(_kbCurrent.IsKeyDown(Keys.A))
                     _cannon.Direction = new Vector2(-1, 0);
@@ -104,6 +105,7 @@ public class MosquitoAttackGame : Game
                 
                 
                 _cannon.Update(gameTime);
+
                 foreach(Mosquito m in _mosquitoes)
                 {
                     m.Update(gameTime);
@@ -111,14 +113,20 @@ public class MosquitoAttackGame : Game
                     {
                         m.Die();
                     }
+
+                    if(_cannon.Alive && m.ProcessCollision(_cannon.BoundingBox))
+                    {
+                        _cannon.Die();
+                    }
                 }
                 break;
+
             case GameState.Paused:
                 if(Pressed(Keys.P))
-                    _gameState = GameState.Playing;
+                    _gameState = GameState.Level01;
                 break;
             case GameState.Over:
-            
+
                 break;
         }
         _kbPrevious = _kbCurrent;
@@ -131,7 +139,7 @@ public class MosquitoAttackGame : Game
         _spriteBatch.Begin();
         switch(_gameState)
         {
-            case GameState.Playing:        
+            case GameState.Level01:        
                 _spriteBatch.Draw(_background, Vector2.Zero, Color.White);
                 _cannon.Draw(_spriteBatch);
                 foreach(Mosquito m in _mosquitoes)

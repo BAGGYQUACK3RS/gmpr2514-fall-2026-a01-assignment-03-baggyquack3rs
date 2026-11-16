@@ -24,7 +24,7 @@ public class Cannon
      internal bool Alive { get => _state == State.Alive;}
 
     private Texture2D _texture;
-    private Rectangle BoundingBox
+    internal Rectangle BoundingBox
     {
         get 
         { 

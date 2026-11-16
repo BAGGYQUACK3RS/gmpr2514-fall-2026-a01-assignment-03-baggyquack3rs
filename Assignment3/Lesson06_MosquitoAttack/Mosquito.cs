@@ -1,3 +1,4 @@
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,8 +7,8 @@ namespace Lesson06_MosquitoAttack;
 
 public class Mosquito
 {
-    private const float _DyingDuration = 1f;
-    private float _dyingTimer = 0;
+    private const float _DyingDuration = 1f, _DecisionDelay = 10f;
+    private float _dyingTimer = 0, _decisionTimer = 0, _decision;
 
     private SimpleAnimation _animationAlive, _animationDying;
     private Vector2 _position;
@@ -22,6 +23,8 @@ public class Mosquito
     private State _state = State.Alive;
 
     internal bool Alive { get => _state == State.Alive;}
+
+    private Random _rand= new Random();
 
     private Texture2D _texture;
     internal Rectangle BoundingBox
@@ -41,12 +44,15 @@ public class Mosquito
 
         _fBall = new FireBall();
         _fBall.Initialize(40, gameBoundingBox);
+        _decisionTimer = (float)_rand.NextDouble() * _DecisionDelay;
     }
+
     internal void LoadContent(ContentManager content)
     {
         _texture = content.Load<Texture2D>("Mosquito");
         _animationAlive = new SimpleAnimation(_texture, _texture.Width / 11, _texture.Height, 11, 8f);
-        
+        _fBall.LoadContent(content);
+
         Texture2D dyingTexture = content.Load<Texture2D>("Poof");
         int frameWidth = 16;
         int frameHeight = dyingTexture.Height;
@@ -58,6 +64,8 @@ public class Mosquito
     internal void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _decision = _rand.Next(1, 50); 
+
         switch(_state)
         {
             case State.Alive:
@@ -75,9 +83,21 @@ public class Mosquito
             case State.Dead:
                 break;
         }  
+
+        _decisionTimer += dt;
+        if(_decision == 1 && _decisionTimer >= _DecisionDelay)
+        {
+            _decisionTimer = 0;
+            Shoot();
+        }
+            
+        _fBall.Update(gameTime);
     }
+
     internal void Draw(SpriteBatch spriteBatch)
     {
+        _fBall.Draw(spriteBatch);
+
         switch(_state)
         {
             case State.Alive:
@@ -96,10 +116,9 @@ public class Mosquito
     {
         if(_fBall.Shootable)
         {
-
             float cbPositionX = BoundingBox.Center.X - _fBall.BoundingBox.Width / 2;
-            float cbPositionY = BoundingBox.Top - _fBall.BoundingBox.Height;
-            _fBall.Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, -1));
+            float cbPositionY = BoundingBox.Bottom;
+            _fBall.Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, 1));
         }
     }
 

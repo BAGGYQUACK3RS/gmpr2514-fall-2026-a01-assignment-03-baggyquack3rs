@@ -69,6 +69,11 @@ public class FireBall
 
     internal bool ProcessCollision(Rectangle boundingBox)
     {
-        return _state == State.Flying && BoundingBox.Intersects(boundingBox);
+        if (_state == State.Flying && BoundingBox.Intersects(boundingBox))
+        {
+            _state = State.NotFlying;
+            return true;
+        }
+        return false;
     }
 }
