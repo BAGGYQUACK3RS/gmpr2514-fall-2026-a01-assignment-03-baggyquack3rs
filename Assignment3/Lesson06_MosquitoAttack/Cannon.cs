@@ -66,7 +66,6 @@ public class Cannon
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _position += Direction * _speed * dt;
-        // "?" checks for null before executing the method
         if(Direction != Vector2.Zero)
             _animationAlive?.Update(gameTime);
 
@@ -123,7 +122,6 @@ public class Cannon
         {
             if(_cBalls[index].Shootable)
             {
-                //shoot it
                 float cbPositionX = BoundingBox.Center.X - _cBalls[index].BoundingBox.Width / 2;
                 float cbPositionY = BoundingBox.Top - _cBalls[index].BoundingBox.Height;
                 _cBalls[index].Shoot(new Vector2(cbPositionX, cbPositionY), new Vector2(0, -1));

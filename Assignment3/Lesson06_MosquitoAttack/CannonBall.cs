@@ -15,6 +15,7 @@ public class CannonBall
     private enum State { Flying, NotFlying }
     private State _state = State.NotFlying;
     
+    
     internal Rectangle BoundingBox
     {
         get => new Rectangle((int)_position.X, (int)_position.Y, _texture.Width, _texture.Height);
